@@ -1,0 +1,327 @@
+# ============================================================
+# cURL Commands for Stateless vs Stateful Server Testing
+# ============================================================
+# 
+# This file contains cURL commands to test both servers
+# Copy and paste commands into your terminal
+#
+# Prerequisites:
+# 1. Both servers running: npm start or node server.js
+# 2. jq installed for pretty JSON output (optional)
+#
+# ============================================================
+
+# ============================================================
+# STATELESS SERVER COMMANDS (Port 3001)
+# ============================================================
+
+# Health Check
+echo "=== Stateless Health Check ==="
+curl -s http://localhost:3001/health -H "Client-ID: curl-demo" | jq .
+
+# Server Information
+echo -e "\n=== Stateless Server Info ==="
+curl -s http://localhost:3001/info -H "Client-ID: curl-demo" | jq .
+
+# Multiple Info Requests (shows statelessness)
+echo -e "\n=== Multiple Stateless Info Requests ==="
+for i in {1..3}; do
+    echo "Request $i:"
+    curl -s http://localhost:3001/info -H "Client-ID: curl-demo" | jq '.data.requestCount, .data.timestamp'
+done
+
+# Basic Calculation
+echo -e "\n=== Stateless Calculation ==="
+curl -s -X POST http://localhost:3001/calculate \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -d '{"operation": "add", "values": [1, 2, 3, 4, 5]}' | jq .
+
+# Random Numbers
+echo -e "\n=== Random Numbers ==="
+curl -s "http://localhost:3001/random?count=5&type=number" \
+  -H "Client-ID: curl-demo" | jq .
+
+# Random Strings
+echo -e "\n=== Random Strings ==="
+curl -s "http://localhost:3001/random?count=3&type=string" \
+  -H "Client-ID: curl-demo" | jq .
+
+# Get Users
+echo -e "\n=== Get Users ==="
+curl -s http://localhost:3001/users -H "Client-ID: curl-demo" | jq .
+
+# Get Specific User
+echo -e "\n=== Get Specific User ==="
+curl -s http://localhost:3001/users/user001 -H "Client-ID: curl-demo" | jq .
+
+# Get Products
+echo -e "\n=== Get Products ==="
+curl -s http://localhost:3001/products -H "Client-ID: curl-demo" | jq .
+
+# Filter Products
+echo -e "\n=== Filter Products ==="
+curl -s "http://localhost:3001/products?category=electronics&minPrice=15" \
+  -H "Client-ID: curl-demo" | jq .
+
+# Demonstrate Stateless Behavior
+echo -e "\n=== Demonstrate Stateless Behavior ==="
+curl -s http://localhost:3001/demonstrate/stateless -H "Client-ID: curl-demo" | jq .
+
+# Error Handling - Invalid Operation
+echo -e "\n=== Error Handling - Invalid Operation ==="
+curl -s -X POST http://localhost:3001/calculate \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -d '{"operation": "invalid", "values": [1, 2, 3]}' | jq .
+
+# ============================================================
+# STATEFUL SERVER COMMANDS (Port 3002)
+# ============================================================
+
+# Health Check
+echo -e "\n=== Stateful Health Check ==="
+curl -s http://localhost:3002/health -H "Client-ID: curl-demo" | jq .
+
+# Create Session (store session ID)
+echo -e "\n=== Create Session ==="
+SESSION_RESPONSE=$(curl -s -X POST http://localhost:3002/session \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -d '{"userId": "user001", "data": {"theme": "dark"}}')
+
+echo "$SESSION_RESPONSE" | jq .
+
+# Extract Session ID
+SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.data.session.id')
+echo "Session ID: $SESSION_ID"
+
+# Get Session Information
+echo -e "\n=== Get Session Info ==="
+curl -s http://localhost:3002/session \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Get Server Info with Session Context
+echo -e "\n=== Stateful Server Info ==="
+curl -s http://localhost:3002/info \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Shopping Cart - Get Empty Cart
+echo -e "\n=== Get Empty Cart ==="
+curl -s http://localhost:3002/cart \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Shopping Cart - Add Items
+echo -e "\n=== Add Items to Cart ==="
+curl -s -X POST http://localhost:3002/cart/add \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" \
+  -d '{"productId": "prod001", "quantity": 2}' | jq .
+
+# Add More Items
+echo -e "\n=== Add More Items ==="
+curl -s -X POST http://localhost:3002/cart/add \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" \
+  -d '{"productId": "prod002", "quantity": 1}' | jq .
+
+# View Cart Contents
+echo -e "\n=== View Cart Contents ==="
+curl -s http://localhost:3002/cart \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Remove Item from Cart
+echo -e "\n=== Remove Item from Cart ==="
+curl -s -X DELETE http://localhost:3002/cart/remove/prod001 \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# User Profile - Get Profile
+echo -e "\n=== Get User Profile ==="
+curl -s http://localhost:3002/profile \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Update User Preferences
+echo -e "\n=== Update User Preferences ==="
+curl -s -X PUT http://localhost:3002/profile/preferences \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" \
+  -d '{"preferences": {"theme": "light", "language": "en", "notifications": true}}' | jq .
+
+# Demonstrate Stateful Behavior (Multiple Visits)
+echo -e "\n=== Demonstrate Stateful Behavior ==="
+for i in {1..3}; do
+    echo "Visit $i:"
+    curl -s http://localhost:3002/demonstrate/stateful \
+      -H "Client-ID: curl-demo" \
+      -H "Session-ID: $SESSION_ID" | jq '.data.visitCount, .data.explanation[1]'
+done
+
+# Start Workflow
+echo -e "\n=== Start Workflow ==="
+curl -s -X POST http://localhost:3002/workflow/start \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# Advance Workflow Steps
+echo -e "\n=== Advance Workflow ==="
+for i in {1..4}; do
+    echo "Step $i:"
+    curl -s -X POST http://localhost:3002/workflow/next \
+      -H "Content-Type: application/json" \
+      -H "Client-ID: curl-demo" \
+      -H "Session-ID: $SESSION_ID" | jq '.data.currentStep, .data.progress'
+done
+
+# Delete Session (Logout)
+echo -e "\n=== Delete Session ==="
+curl -s -X DELETE http://localhost:3002/session \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $SESSION_ID" | jq .
+
+# ============================================================
+# COMPARISON COMMANDS
+# ============================================================
+
+# Side-by-Side Comparison
+echo -e "\n=== Side-by-Side Comparison ==="
+
+echo "Stateless Server:"
+curl -s http://localhost:3001/info -H "Client-ID: curl-demo" | jq '.data.message, .data.note'
+
+echo -e "\nStateful Server:"
+echo "Stateful server requires session - creating one..."
+TEMP_SESSION=$(curl -s -X POST http://localhost:3002/session \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -d '{"userId": "temp-user"}' | jq -r '.data.session.id')
+
+curl -s http://localhost:3002/info \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $TEMP_SESSION" | jq '.data.message, .data.note'
+
+# Clean up temp session
+curl -s -X DELETE http://localhost:3002/session \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $TEMP_SESSION" > /dev/null
+
+# ============================================================
+# ERROR HANDLING DEMONSTRATIONS
+# ============================================================
+
+# Stateless Error Handling
+echo -e "\n=== Stateless Error Handling ==="
+
+# Invalid Endpoint
+echo "Invalid endpoint:"
+curl -s http://localhost:3001/invalid -H "Client-ID: curl-demo" | jq .
+
+# Invalid Calculation
+echo "Invalid calculation:"
+curl -s -X POST http://localhost:3001/calculate \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: curl-demo" \
+  -d '{"operation": "invalid", "values": [1, 2]}' | jq .
+
+# Stateful Error Handling
+echo -e "\n=== Stateful Error Handling ==="
+
+# No Session
+echo "No session provided:"
+curl -s http://localhost:3002/cart -H "Client-ID: curl-demo" | jq .
+
+# Invalid Session
+echo "Invalid session:"
+curl -s http://localhost:3002/profile \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: invalid-session" | jq .
+
+# ============================================================
+# LOAD TESTING COMMANDS
+# ============================================================
+
+# Simple Load Test - Stateless
+echo -e "\n=== Stateless Load Test (10 concurrent requests) ==="
+for i in {1..10}; do
+    curl -s http://localhost:3001/info -H "Client-ID: load-test-$i" \
+      > /dev/null &
+done
+wait
+echo "10 stateless requests completed"
+
+# Simple Load Test - Stateful (same session)
+echo -e "\n=== Stateful Load Test (10 requests, same session) ==="
+# Create session first
+LOAD_SESSION=$(curl -s -X POST http://localhost:3002/session \
+  -H "Content-Type: application/json" \
+  -H "Client-ID: load-test" \
+  -d '{"userId": "load-user"}' | jq -r '.data.session.id')
+
+for i in {1..10}; do
+    curl -s http://localhost:3002/demonstrate/stateful \
+      -H "Client-ID: curl-demo" \
+      -H "Session-ID: $LOAD_SESSION" \
+      > /dev/null &
+done
+wait
+echo "10 stateful requests completed"
+
+# Clean up load test session
+curl -s -X DELETE http://localhost:3002/session \
+  -H "Client-ID: curl-demo" \
+  -H "Session-ID: $LOAD_SESSION" > /dev/null
+
+# ============================================================
+# QUICK TEST SCRIPT
+# ============================================================
+
+# Quick functionality test
+echo -e "\n=== Quick Functionality Test ==="
+echo "Testing both servers..."
+
+# Test Stateless
+STATELESS_HEALTH=$(curl -s http://localhost:3001/health -H "Client-ID: quick-test" | jq -r '.data.status')
+echo "Stateless Server: $STATELESS_HEALTH"
+
+# Test Stateful
+STATEFUL_HEALTH=$(curl -s http://localhost:3002/health -H "Client-ID: quick-test" | jq -r '.data.status')
+echo "Stateful Server: $STATEFUL_HEALTH"
+
+if [[ "$STATELESS_HEALTH" == "healthy" && "$STATEFUL_HEALTH" == "healthy" ]]; then
+    echo "✅ Both servers are running correctly!"
+else
+    echo "❌ One or both servers are not responding correctly"
+    echo "Make sure both servers are running: npm start or node server.js"
+fi
+
+# ============================================================
+# USAGE NOTES
+# ============================================================
+#
+# 1. Install jq for pretty JSON output:
+#    - macOS: brew install jq
+#    - Ubuntu: sudo apt-get install jq
+#    - Windows: Download from https://stedolan.github.io/jq/download/
+#
+# 2. Run individual commands or save as a script:
+#    chmod +x curl-commands.txt
+#    ./curl-commands.txt
+#
+# 3. For Windows PowerShell, you may need to modify the syntax:
+#    - Replace $(...) with $(...) for command substitution
+#    - Use different variable assignment syntax
+#
+# 4. These commands demonstrate the key differences:
+#    - Stateless: No session required, each request independent
+#    - Stateful: Session management, state persistence across requests
+#
+# ============================================================

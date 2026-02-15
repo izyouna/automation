@@ -1,0 +1,8 @@
+# values.yaml for loki-stack
+loki:
+  persistence:
+    enabled: true
+    size: 20Gi
+
+promtail:
+  enabled: true

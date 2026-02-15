@@ -1,0 +1,30 @@
+groups:
+  - name: mime_transfer
+    interval: 30s
+    rules:
+
+      - alert: MimeServerDown
+        expr: up{job="mime-server"} == 0
+        for: 2m
+        annotations:
+          summary: "MIME Server is down"
+          description: "MIME Server has been down for more than 2 minutes"
+
+      - alert: GatewayHighErrorRate
+        expr: rate(gateway_http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        annotations:
+          summary: "Gateway has high error rate"
+          description: "Error rate is > 5% for 5 minutes"
+
+      - alert: StorageVolumeFull
+        expr: (docker_container_volumes_used / docker_container_volumes_limit) > 0.9
+        annotations:
+          summary: "Storage volume is >90% full"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, transfer_duration_seconds) > 5
+        for: 5m
+        annotations:
+          summary: "File transfer latency is high"
+          description: "p95 latency > 5 seconds"

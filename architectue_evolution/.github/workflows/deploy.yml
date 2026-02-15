@@ -1,0 +1,62 @@
+name: Deploy Phase 1
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - 'monitoring/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy-terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init -backend=false
+
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          terraform plan -var-file=environments/dev.tfvars -out=tfplan
+
+      - name: Terraform Apply
+        if: success()
+        run: |
+          cd terraform
+          terraform apply -auto-approve tfplan
+
+  deploy-monitoring:
+    needs: deploy-terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy Prometheus & Grafana
+        run: |
+          cd monitoring
+          docker-compose -f docker-compose.monitoring.yml up -d
+
+      - name: Wait for Grafana
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/api/health > /dev/null; then
+              echo "Grafana is ready"
+              exit 0
+            fi
+            echo "Waiting for Grafana... ($i/30)"
+            sleep 2
+          done
+          exit 1
+
+      - name: Verify Grafana Datasource
+        run: |
+          curl -X GET http://localhost:3000/api/datasources

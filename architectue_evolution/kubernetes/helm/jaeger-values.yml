@@ -1,0 +1,6 @@
+# values.yaml for jaeger
+provisionDataStore:
+  cassandra: false
+  elasticsearch: false
+storage:
+  type: memory

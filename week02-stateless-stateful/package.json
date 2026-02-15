@@ -1,0 +1,11 @@
+{
+    "devDependencies": {
+        "ajv": "^8.17.1",
+        "ajv-formats": "^2.1.1",
+        "js-yaml": "^4.1.0"
+    },
+    "scripts": {
+        "roo:gen": "node scripts/roo-state.mjs",
+        "roo:check": "node scripts/roo-state.mjs --check"
+    }
+}

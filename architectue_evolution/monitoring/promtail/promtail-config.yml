@@ -1,0 +1,41 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Gateway logs
+  - job_name: gateway
+    docker:
+      host: unix:///var/run/docker.sock
+      names:
+        - mockup-gateway
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_service']
+        target_label: 'service'
+
+  # MIME Server logs
+  - job_name: mime-server
+    docker:
+      host: unix:///var/run/docker.sock
+      names:
+        - mime-server
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_service']
+        target_label: 'service'
+
+  # System logs (if available)
+  - job_name: syslog
+    syslog:
+      listen_address: 0.0.0.0:514
+      labels:
+        job: syslog

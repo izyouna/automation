@@ -1,0 +1,12 @@
+# values.yaml for kube-prometheus-stack
+grafana:
+  enabled: true
+  adminPassword: "admin"
+
+prometheus:
+  prometheusSpec:
+    scrapeInterval: "15s"
+    evaluationInterval: "15s"
+    serviceMonitorSelector:
+      matchLabels:
+        release: prometheus

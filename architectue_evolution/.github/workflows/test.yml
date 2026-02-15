@@ -1,0 +1,48 @@
+name: Test & Validate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Validate JSON files
+        run: |
+          find monitoring/grafana/dashboards -name "*.json" -exec jq . {} \; > /dev/null
+
+      - name: Validate Terraform
+        run: |
+          cd terraform
+          terraform init -backend=false
+          terraform validate
+
+  test-health-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Test health check scripts
+        run: |
+          python -m py_compile health-checks/mime-server-health.py
+          python -m py_compile health-checks/app-health-endpoint.py
+
+  docker-compose-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check docker-compose syntax
+        run: |
+          docker-compose config > /dev/null
+          docker-compose -f monitoring/docker-compose.monitoring.yml config > /dev/null

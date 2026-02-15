@@ -1,0 +1,144 @@
+{
+  "agents": [
+    {
+      "heartbeat_utc": "2026-02-06T09:46:00Z",
+      "id": "cascade",
+      "role": "coder+orchestrator",
+      "state": "completing",
+      "working_set": [
+        "phase1-mockup/",
+        "src/stateless-server.js",
+        "src/stateful-server.js",
+        "server.js",
+        "src/clients/",
+        "tests/",
+        "docs/",
+        "examples/",
+        "scripts/",
+        ".roo/",
+        ".github/",
+        "package.json"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-021",
+      "made_by": "architect",
+      "summary": "Node.js/Express chosen for Phase 1 mockup due to clarity and low cognitive load",
+      "utc": "2026-02-05T10:40:00Z"
+    },
+    {
+      "id": "D-022",
+      "made_by": "roo",
+      "summary": "Dual-mode server design used to explicitly demonstrate stateless vs stateful behavior",
+      "utc": "2026-02-05T13:10:00Z"
+    },
+    {
+      "id": "D-023",
+      "made_by": "cascade",
+      "summary": "Comprehensive Phase 1 mockup implementation completed with full DOR/DOD compliance",
+      "utc": "2026-02-06T09:46:00Z"
+    },
+    {
+      "id": "D-024",
+      "made_by": "cascade+human",
+      "summary": "AI-Human-AI audit compliance established with GitHub workflow integration",
+      "utc": "2026-02-06T09:46:00Z"
+    }
+  ],
+  "hitl_gates": [
+    {
+      "gate": "human_review",
+      "status": "not_required",
+      "triggers": [
+        "production deployment",
+        "authentication/authorization changes",
+        "handling real user data"
+      ]
+    }
+  ],
+  "locks": [
+    {
+      "acquired_utc": "2026-02-05T12:55:00Z",
+      "owner": "roo",
+      "scope": "phase1-mockup/",
+      "ttl_minutes": 60
+    },
+    {
+      "acquired_utc": "2026-02-05T16:42:31Z",
+      "owner": "roo",
+      "scope": ".roo/",
+      "ttl_minutes": 60
+    },
+    {
+      "acquired_utc": "2026-02-05T16:42:31Z",
+      "owner": "roo",
+      "scope": "scripts/",
+      "ttl_minutes": 60
+    },
+    {
+      "acquired_utc": "2026-02-05T16:42:31Z",
+      "owner": "roo",
+      "scope": ".github/",
+      "ttl_minutes": 60
+    },
+    {
+      "acquired_utc": "2026-02-05T16:42:31Z",
+      "owner": "roo",
+      "scope": "package.json",
+      "ttl_minutes": 60
+    }
+  ],
+  "objective_now": "Phase 1 mockup implementation completed with AI-Human-AI audit compliance",
+  "owners": {
+    "lead_agent": "cascade",
+    "lead_human": "user"
+  },
+  "phase": "complete",
+  "policy_mode": "audit_compliant",
+  "risks": [
+    {
+      "id": "R-011",
+      "level": "low",
+      "mitigation": "Explicit separation of servers and request scopes",
+      "summary": "State leakage between stateless and stateful demos",
+      "type": "data-integrity"
+    }
+  ],
+  "schema": "roo.status.v2",
+  "task_board": [
+    {
+      "approvals_required": ["human_review"],
+      "depends_on": [],
+      "id": "T-021",
+      "owner": "cascade",
+      "priority": "P0",
+      "progress_pct": 100,
+      "status": "completed",
+      "title": "Phase 1 mockup implementation"
+    },
+    {
+      "approvals_required": [],
+      "depends_on": [
+        "T-021"
+      ],
+      "id": "T-022",
+      "owner": "cascade+human",
+      "priority": "P1",
+      "status": "completed",
+      "title": "AI-Human-AI audit compliance and DOR/DOD implementation"
+    },
+    {
+      "approvals_required": [],
+      "depends_on": [],
+      "id": "T-023",
+      "owner": "architect",
+      "priority": "P2",
+      "status": "complete",
+      "title": "Phase 2 infrastructure planning"
+    }
+  ],
+  "updated_utc": "2026-02-06T09:46:00Z",
+  "workspace_id": "phase1-stateless-stateful-demo"
+}

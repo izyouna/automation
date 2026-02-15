@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mime-infra
+
+resources:
+- namespace.yml
+- gateway-deployment.yml
+- gateway-service.yml
+- mime-server-deployment.yml
+- mime-server-service.yml
+- mime-storage-pvc.yml
+- public-app-deployment.yml
+- public-app-service.yml
+- network-policy.yml
+
+configMapGenerator:
+- name: gateway-config
+  files:
+  - nginx.conf=./nginx.conf

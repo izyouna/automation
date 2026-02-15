@@ -1,0 +1,80 @@
+{
+  "dashboard": {
+    "title": "SLA/SLO Dashboard - MIME Transfer",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Availability %",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(1 - (rate(mime_server_down[30m]) / 1)) * 100",
+            "legendFormat": "Availability"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null, "value": 95},
+                {"color": "yellow", "value": 99},
+                {"color": "green", "value": 99.9}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Error Rate vs SLO",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~'5..'}[5m])",
+            "legendFormat": "Actual Error Rate"
+          },
+          {
+            "expr": "0.01",
+            "legendFormat": "SLO (1%)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Latency vs SLO (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, transfer_duration_seconds)",
+            "legendFormat": "Actual p95"
+          },
+          {
+            "expr": "1",
+            "legendFormat": "SLO (1s)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Budget Remaining",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "100 - (rate(errors_total[30d]) * 100 / 0.01)",
+            "legendFormat": "Error Budget %"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ]
+  }
+}

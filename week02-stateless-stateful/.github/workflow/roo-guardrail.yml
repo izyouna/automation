@@ -1,0 +1,31 @@
+name: Roo Status Guardrail
+
+on:
+  pull_request:
+    paths:
+      - ".roo/status.md"
+      - ".roo/schema/**"
+      - "scripts/roo-state.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
+
+jobs:
+  roo-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate schema + mirror up-to-date
+        run: npm run roo:check

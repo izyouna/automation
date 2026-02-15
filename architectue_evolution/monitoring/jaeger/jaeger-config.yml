@@ -1,0 +1,26 @@
+# Jaeger All-in-One Configuration
+# Integrates collection, processing, and visualization
+
+version: 1
+
+querier:
+  base_path: /jaeger
+
+collector:
+  port: 14268
+  grpc:
+    enabled: true
+    host_port: "0.0.0.0:14250"
+
+storage:
+  type: memory
+  memory:
+    max_traces: 10000
+
+reporter_loggers:
+  log_spans: true
+
+metrics:
+  backend: prometheus
+  prometheus:
+    expose_handler: true

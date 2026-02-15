@@ -1,0 +1,432 @@
+### ============================================================
+### Stateless vs Stateful Server API Examples
+### ============================================================
+### This file contains HTTP requests for testing both servers
+### Use with VS Code REST Client extension or similar tools
+### ============================================================
+
+### Variables
+@stateless_host = http://localhost:3001
+@stateful_host = http://localhost:3002
+@client_id = demo-client
+
+### ============================================================
+### STATELESS SERVER EXAMPLES
+### ============================================================
+
+### Health Check
+GET {{stateless_host}}/health
+Client-ID: {{client_id}}
+
+###
+
+### Server Information
+GET {{stateless_host}}/info
+Client-ID: {{client_id}}
+
+###
+
+### Basic Calculation
+POST {{stateless_host}}/calculate
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "operation": "add",
+    "values": [1, 2, 3, 4, 5]
+}
+
+###
+
+### Complex Calculations
+POST {{stateless_host}}/calculate
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "operation": "multiply",
+    "values": [2, 3, 4]
+}
+
+###
+
+### Random Numbers
+GET {{stateless_host}}/random?count=5&type=number
+Client-ID: {{client_id}}
+
+###
+
+### Random Strings
+GET {{stateless_host}}/random?count=3&type=string
+Client-ID: {{client_id}}
+
+###
+
+### Random Booleans
+GET {{stateless_host}}/random?count=4&type=boolean
+Client-ID: {{client_id}}
+
+###
+
+### Get All Users
+GET {{stateless_host}}/users
+Client-ID: {{client_id}}
+
+###
+
+### Get Specific User
+GET {{stateless_host}}/users/user001
+Client-ID: {{client_id}}
+
+###
+
+### Get All Products
+GET {{stateless_host}}/products
+Client-ID: {{client_id}}
+
+###
+
+### Filter Products by Category
+GET {{stateless_host}}/products?category=electronics
+Client-ID: {{client_id}}
+
+###
+
+### Filter Products by Price Range
+GET {{stateless_host}}/products?minPrice=15&maxPrice=25
+Client-ID: {{client_id}}
+
+###
+
+### Demonstrate Stateless Behavior
+GET {{stateless_host}}/demonstrate/stateless
+Client-ID: {{client_id}}
+
+###
+
+### Compare with Stateful
+GET {{stateless_host}}/compare/stateful
+Client-ID: {{client_id}}
+
+###
+
+### Error Handling - Invalid Operation
+POST {{stateless_host}}/calculate
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "operation": "invalid",
+    "values": [1, 2, 3]
+}
+
+###
+
+### Error Handling - Missing Data
+POST {{stateless_host}}/calculate
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "operation": "add"
+}
+
+###
+
+### Error Handling - Invalid User
+GET {{stateless_host}}/users/nonexistent
+Client-ID: {{client_id}}
+
+###
+
+### ============================================================
+### STATEFUL SERVER EXAMPLES
+### ============================================================
+
+### Health Check
+GET {{stateful_host}}/health
+Client-ID: {{client_id}}
+
+###
+
+### Create Session
+POST {{stateful_host}}/session
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "userId": "user001",
+    "data": {
+        "preferences": {
+            "theme": "dark",
+            "language": "en"
+        }
+    }
+}
+
+> {%
+// Store session ID for subsequent requests
+client.global.set("session_id", response.headers.valuesOf("Session-ID")[0]);
+%}
+
+###
+
+### Get Session Information
+GET {{stateful_host}}/session
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Update Session Data
+PUT {{stateful_host}}/session
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+{
+    "data": {
+        "lastAction": "Updated session via REST client",
+        "timestamp": "2026-02-06T09:30:00Z"
+    }
+}
+
+###
+
+### Get Server Info with Session Context
+GET {{stateful_host}}/info
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Shopping Cart - Get Empty Cart
+GET {{stateful_host}}/cart
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Shopping Cart - Add Items
+POST {{stateful_host}}/cart/add
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+{
+    "productId": "prod001",
+    "quantity": 2
+}
+
+###
+
+### Shopping Cart - Add More Items
+POST {{stateful_host}}/cart/add
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+{
+    "productId": "prod002",
+    "quantity": 1
+}
+
+###
+
+### Shopping Cart - View Cart Contents
+GET {{stateful_host}}/cart
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Shopping Cart - Remove Item
+DELETE {{stateful_host}}/cart/remove/prod001
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Shopping Cart - Clear Cart
+DELETE {{stateful_host}}/cart
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### User Profile - Get Profile
+GET {{stateful_host}}/profile
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### User Profile - Update Preferences
+PUT {{stateful_host}}/profile/preferences
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+{
+    "preferences": {
+        "theme": "light",
+        "language": "en",
+        "notifications": true,
+        "currency": "USD"
+    }
+}
+
+###
+
+### Demonstrate Stateful Behavior (First Visit)
+GET {{stateful_host}}/demonstrate/stateful
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Demonstrate Stateful Behavior (Second Visit)
+GET {{stateful_host}}/demonstrate/stateful
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Workflow - Start Multi-Step Process
+POST {{stateful_host}}/workflow/start
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Workflow - Advance to Next Step
+POST {{stateful_host}}/workflow/next
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Workflow - Continue Through Steps
+POST {{stateful_host}}/workflow/next
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Workflow - Complete Workflow
+POST {{stateful_host}}/workflow/next
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Delete Session (Logout)
+DELETE {{stateful_host}}/session
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Error Handling - No Session
+GET {{stateful_host}}/cart
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+###
+
+### Error Handling - Invalid Session
+GET {{stateful_host}}/profile
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: invalid-session-id
+
+###
+
+### Error Handling - Missing Required Data
+POST {{stateful_host}}/session
+Content-Type: application/json
+Client-ID: {{client_id}}
+
+{
+    "data": {}
+}
+
+###
+
+### ============================================================
+### COMPARISON EXAMPLES
+### ============================================================
+
+### Same Request to Both Servers - Info
+GET {{stateless_host}}/info
+Client-ID: {{client_id}}
+
+###
+
+GET {{stateful_host}}/info
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### Same Request to Both Servers - Health
+GET {{stateless_host}}/health
+Client-ID: {{client_id}}
+
+###
+
+GET {{stateful_host}}/health
+Client-ID: {{client_id}}
+
+###
+
+### ============================================================
+### LOAD TESTING EXAMPLES
+### ============================================================
+
+### Multiple Stateless Requests (copy/paste multiple times)
+GET {{stateless_host}}/info
+Client-ID: {{client_id}}
+
+###
+
+### Multiple Stateful Requests (same session)
+GET {{stateful_host}}/demonstrate/stateful
+Content-Type: application/json
+Client-ID: {{client_id}}
+Session-ID: {{session_id}}
+
+###
+
+### ============================================================
+### NOTES
+### ============================================================
+### 
+### 1. Make sure both servers are running before executing requests
+###    Run: npm start or node server.js
+###
+### 2. The stateful examples require a valid session ID
+###    The first stateful request creates a session and stores it
+###
+### 3. Use these requests to understand the differences:
+###    - Stateless: Each request is independent
+###    - Stateful: Server remembers context between requests
+###
+### 4. Try the same requests multiple times to see the difference
+###    in behavior between stateless and stateful servers
+###
+### ============================================================

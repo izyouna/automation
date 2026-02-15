@@ -1,0 +1,79 @@
+{
+    "server": {
+        "name": "Stateless vs Stateful Mockup Server",
+        "version": "1.0.0",
+        "environment": "development"
+    },
+    "ports": {
+        "combined": 3000,
+        "stateless": 3001,
+        "stateful": 3002
+    },
+    "logging": {
+        "level": "info",
+        "format": "combined",
+        "directory": "./logs"
+    },
+    "stateless": {
+        "maxRequestSize": "1mb",
+        "timeout": 30000,
+        "enableCors": true
+    },
+    "stateful": {
+        "sessionTimeout": 900000,
+        "maxSessions": 1000,
+        "sessionCleanupInterval": 60000,
+        "enableCors": true
+    },
+    "security": {
+        "rateLimit": {
+            "windowMs": 60000,
+            "maxRequests": 100
+        },
+        "helmet": {
+            "enabled": true
+        }
+    },
+    "mockData": {
+        "users": [
+            {
+                "id": "user001",
+                "name": "Test User 1",
+                "email": "user1@example.com",
+                "preferences": {
+                    "theme": "light",
+                    "language": "en"
+                }
+            },
+            {
+                "id": "user002",
+                "name": "Test User 2",
+                "email": "user2@example.com",
+                "preferences": {
+                    "theme": "dark",
+                    "language": "en"
+                }
+            }
+        ],
+        "products": [
+            {
+                "id": "prod001",
+                "name": "Sample Product A",
+                "price": 29.99,
+                "category": "electronics"
+            },
+            {
+                "id": "prod002",
+                "name": "Sample Product B",
+                "price": 19.99,
+                "category": "books"
+            },
+            {
+                "id": "prod003",
+                "name": "Sample Product C",
+                "price": 9.99,
+                "category": "accessories"
+            }
+        ]
+    }
+}

@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "title": "MIME Transfer Service - Phase 1",
+    "timezone": "browser",
+    "refresh": "10s",
+    "schemaVersion": 30,
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=~\"mime-server|gateway\"}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "File Transfer Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(file_transfers_total[5m])",
+            "legendFormat": "transfers/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Average Transfer Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(transfer_duration_seconds_sum[5m]) / rate(transfer_duration_seconds_count[5m])",
+            "legendFormat": "avg duration"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Storage Usage",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(docker_container_volumes_used / docker_container_volumes_limit) * 100"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ]
+  }
+}

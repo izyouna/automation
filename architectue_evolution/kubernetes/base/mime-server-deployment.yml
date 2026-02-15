@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mime-server
+  labels:
+    app: mime-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mime-server
+  template:
+    metadata:
+      labels:
+        app: mime-server
+    spec:
+      containers:
+      - name: mime-server
+        image: boonsup/mime-server:latest
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: mime-storage
+          mountPath: /storage
+        env:
+        - name: STORAGE_DIR
+          value: "/storage"
+      volumes:
+      - name: mime-storage
+        persistentVolumeClaim:
+          claimName: mime-storage-pvc

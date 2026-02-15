@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: public-app
+  labels:
+    app: public-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: public-app
+  template:
+    metadata:
+      labels:
+        app: public-app
+    spec:
+      containers:
+      - name: public-app
+        image: boonsup/public-app:latest
+        ports:
+        - containerPort: 5000

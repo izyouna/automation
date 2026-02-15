@@ -1,0 +1,17 @@
+FROM node:24-alpine
+
+# Install required tools
+RUN apk add --no-cache \
+    bash \
+    curl \
+    jq \
+    rsync
+
+# Set working directory
+WORKDIR /app
+
+# Copy cleanup script
+COPY scripts/cleanup.js /app/cleanup.js
+
+# Run cleanup
+CMD ["node", "cleanup.js"]

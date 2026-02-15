@@ -1,0 +1,217 @@
+{
+  "metadata": {
+    "name": "MIME-Typing + Mockup-Infra Integration",
+    "version": "1.0",
+    "status": "operational",
+    "deployment_date": "2026-02-13T09:22:06+07:00",
+    "last_verified": "2026-02-13T09:22:06+07:00",
+    "runtime": "Podman 5.7.1 with podman-compose 1.5.0"
+  },
+
+  "summary": {
+    "total_services": 4,
+    "total_networks": 2,
+    "total_volumes": 1,
+    "key_feature": "MIME server on dual networks enables cross-network file transfer",
+    "file_transfer_tested": true,
+    "all_services_operational": true
+  },
+
+  "services": {
+    "mockup-gateway": {
+      "role": "L7 Reverse Proxy & Gateway",
+      "image": "nginx:alpine",
+      "status": "running",
+      "networks": {
+        "public_net": { "ipv4": "172.18.0.2" },
+        "private_net": { "ipv4": "172.19.0.2" }
+      },
+      "ports": {
+        "8080": "80/http",
+        "443": "443/https"
+      },
+      "volumes": [],
+      "logging": {
+        "enabled": true,
+        "log_count": 15,
+        "formats": ["main", "audit_detailed", "connection_error", "ssl_connection", "upstream_error"],
+        "compliance": "Thailand Digital Crime Act"
+      },
+      "configuration": "mockup-infra/gateway/nginx.conf",
+      "tls": {
+        "version": "1.3",
+        "certificate_type": "self-signed"
+      }
+    },
+
+    "public-app": {
+      "role": "Public-facing HTTP Service",
+      "image": "python:3.11-slim",
+      "status": "running",
+      "networks": {
+        "public_net": { "ipv4": "172.18.0.3" }
+      },
+      "ports": {
+        "80": "http"
+      },
+      "exposed_to": ["mockup-gateway"],
+      "volumes": []
+    },
+
+    "intranet-api": {
+      "role": "Private API Service",
+      "image": "python:3.11-slim",
+      "status": "running",
+      "networks": {
+        "private_net": { "ipv4": "172.19.0.3" }
+      },
+      "ports": {
+        "5000": "flask"
+      },
+      "exposed_to": ["mockup-gateway"],
+      "volumes": []
+    },
+
+    "mime-server": {
+      "role": "MIME-Aware File Transfer Daemon",
+      "image": "python:3.11-slim",
+      "status": "running",
+      "networks": {
+        "public_net": { "ipv4": "172.18.0.4" },
+        "private_net": { "ipv4": "172.19.0.5" }
+      },
+      "ports": {
+        "65432": "mime-socket"
+      },
+      "volumes": {
+        "mime_storage": "/storage"
+      },
+      "critical_feature": "Dual network (public + private) enables cross-network access",
+      "environment": {
+        "PYTHONIOENCODING": "utf-8",
+        "STORAGE_DIR": "/storage"
+      },
+      "dockerfile": "week01-mime-typing/Dockerfile.server",
+      "verified": {
+        "listening_port": 65432,
+        "cross_network_accessible": true,
+        "file_transfer_working": true
+      }
+    },
+
+    "mime-client": {
+      "role": "MIME File Transfer Client",
+      "image": "python:3.11-slim",
+      "status": "running",
+      "mode": "on-demand",
+      "networks": {
+        "private_net": { "ipv4": "172.19.0.4" }
+      },
+      "environment": {
+        "PYTHONIOENCODING": "utf-8",
+        "MIME_SERVER_HOST": "mime-server",
+        "MIME_SERVER_PORT": 65432
+      },
+      "dockerfile": "week01-mime-typing/Dockerfile.client",
+      "profile": "client-manual",
+      "verified": {
+        "build_successful": true,
+        "network_connectivity": true,
+        "file_transfer_tested": true
+      }
+    }
+  },
+
+  "networks": {
+    "public_net": {
+      "driver": "bridge",
+      "subnet": "172.18.0.0/16",
+      "purpose": "External-facing services",
+      "services": ["mockup-gateway", "public_app", "mime-server"]
+    },
+    "private_net": {
+      "driver": "bridge",
+      "subnet": "172.19.0.0/16",
+      "purpose": "Internal-only services",
+      "services": ["mockup-gateway", "intranet_api", "mime-server", "mime-client"]
+    }
+  },
+
+  "volumes": {
+    "mime_storage": {
+      "driver": "local",
+      "mount_path": "/storage",
+      "purpose": "Persistent file storage for MIME transfers",
+      "attached_to": "mime-server",
+      "retention": "Deleted with podman-compose down -v"
+    }
+  },
+
+  "verification": {
+    "timestamp": "2026-02-13T09:22:06+07:00",
+    "checks": {
+      "file_transfer": {
+        "test_size": "24 bytes",
+        "test_type": "text/plain",
+        "source_network": "private_net (172.19.0.4)",
+        "target": "mime-server (172.19.0.5:65432)",
+        "result": "SUCCESS",
+        "stored_at": "/storage/received_1d8f.plain"
+      },
+      "network_connectivity": {
+        "client_to_server_dns": "VERIFIED",
+        "client_to_server_icmp": "VERIFIED",
+        "client_to_server_tcp_65432": "VERIFIED"
+      },
+      "all_services": "UP",
+      "nginx_config": "VALID (no syntax errors)"
+    }
+  },
+
+  "configuration_notes": [
+    "mime-server configured on BOTH networks to enable cross-network access",
+    "Nginx http2 directive fixed (deprecated → http2 on)",
+    "Nginx $request_id variable renamed to $req_id (duplicate fix)",
+    "All services using PYTHONIOENCODING=utf-8",
+    "Gateway bridges public_net and private_net",
+    "Client runs on-demand (profile: client-manual)"
+  ],
+
+  "next_steps": [
+    "Validate deployment: podman-compose ps",
+    "Test connectivity: podman exec mime-client ping mime-server",
+    "Monitor logs: podman exec mockup-gateway tail -f /var/log/nginx/access.log",
+    "When ready for new branch: Review SYSTEM_PROMPT.md and DEPLOYMENT_STATE.py"
+  ],
+
+  "deployment_commands": {
+    "start_all": "cd mockup-infra && podman-compose up -d",
+    "stop_all": "cd mockup-infra && podman-compose down",
+    "view_status": "podman-compose ps",
+    "view_logs": {
+      "gateway_access": "podman exec mockup-gateway tail -f /var/log/nginx/access.log",
+      "gateway_audit": "podman exec mockup-gateway tail -f /var/log/nginx/audit.log | jq .",
+      "mime_server": "podman-compose logs -f mime-server",
+      "mime_client": "podman-compose logs mime-client --tail 50"
+    },
+    "test_file_transfer": "podman run --rm --network mockup-infra_private_net --entrypoint bash mime-client:latest -c \"echo 'Test' > /tmp/test.txt && python /app/client.py --send /tmp/test.txt --to mime-server:65432\"",
+    "check_storage": "podman exec mime-server ls -lah /storage/"
+  },
+
+  "constraints": [
+    "public_net and private_net isolated except via gateway",
+    "mime_storage deleted with down -v",
+    "TLS certificates are self-signed (test only)",
+    "mime-client runs on-demand (not persistent)",
+    "Only Nginx ports exposed to host (8080, 443)"
+  ],
+
+  "critical_success_criteria": [
+    "All services UP (podman-compose ps)",
+    "File transfer verified (24-byte test)",
+    "Cross-network communication (client → server:172.19.0.5)",
+    "Gateway logging active (15+ files)",
+    "Persistent storage mounted (mime_storage)",
+    "Nginx config valid (no errors)"
+  ]
+}

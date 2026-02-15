@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager-config.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./notification-template.tmpl:/etc/alertmanager/templates/notify.tmpl:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    environment:
+      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
+      PAGERDUTY_KEY: "${PAGERDUTY_KEY}"
+    networks:
+      - monitoring
+
+volumes:
+  alertmanager_data:
+
+networks:
+  monitoring:
+    external: true

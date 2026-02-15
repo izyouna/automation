@@ -1,0 +1,291 @@
+{
+    "$id": "roo.status.v2",
+    "title": "roo.status.v2",
+    "type": "object",
+    "required": [
+        "schema",
+        "workspace_id",
+        "updated_utc",
+        "objective_now",
+        "phase"
+    ],
+    "properties": {
+        "schema": {
+            "const": "roo.status.v2"
+        },
+        "workspace_id": {
+            "type": "string",
+            "minLength": 1
+        },
+        "updated_utc": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "objective_now": {
+            "type": "string",
+            "minLength": 1
+        },
+        "phase": {
+            "type": "string",
+            "enum": [
+                "discovery",
+                "design",
+                "implement",
+                "test",
+                "release",
+                "ops"
+            ]
+        },
+        "policy_mode": {
+            "type": "string",
+            "enum": [
+                "strict",
+                "standard"
+            ]
+        },
+        "owners": {
+            "type": "object",
+            "properties": {
+                "lead_human": {
+                    "type": "string"
+                },
+                "lead_agent": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true
+        },
+        "agents": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "role",
+                    "heartbeat_utc",
+                    "state"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "heartbeat_utc": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "idle",
+                            "reading",
+                            "planning",
+                            "coding",
+                            "testing",
+                            "blocked"
+                        ]
+                    },
+                    "working_set": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "locks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "scope",
+                    "owner",
+                    "acquired_utc",
+                    "ttl_minutes"
+                ],
+                "properties": {
+                    "scope": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "owner": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "acquired_utc": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ttl_minutes": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1440
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "task_board": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "owner",
+                    "status",
+                    "priority"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "owner": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "not_started",
+                            "in_progress",
+                            "blocked",
+                            "complete"
+                        ]
+                    },
+                    "priority": {
+                        "type": "string",
+                        "pattern": "^P[0-3]$"
+                    },
+                    "progress_pct": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "depends_on": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "approvals_required": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "decisions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "summary",
+                    "made_by",
+                    "utc"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "made_by": {
+                        "type": "string"
+                    },
+                    "utc": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "risks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "level",
+                    "summary",
+                    "mitigation"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "security",
+                            "privacy",
+                            "safety",
+                            "compliance",
+                            "cost",
+                            "data-integrity"
+                        ]
+                    },
+                    "level": {
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                        ]
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "mitigation": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "hitl_gates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "gate",
+                    "triggers",
+                    "status"
+                ],
+                "properties": {
+                    "gate": {
+                        "type": "string"
+                    },
+                    "triggers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "required",
+                            "not_required"
+                        ]
+                    }
+                },
+                "additionalProperties": true
+            }
+        }
+    },
+    "additionalProperties": true
+}
